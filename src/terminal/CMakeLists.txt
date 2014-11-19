@@ -1,5 +1,9 @@
 set(SOURCES ${SOURCES} main.c)
 
+if (UNIX AND (NOT APPLE))
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_DEFAULT_SOURCE")
+endif()
+
 set(INTERNAL_LIBRARIES ${INTERNAL_LIBRARIES} modulo)
 
 add_executable(modulo_tty ${SOURCES})
