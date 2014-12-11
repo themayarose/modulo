@@ -20,8 +20,24 @@ bool produce(void * source, int * job_here) {
 	return true;
 }
 
+bool produce_double(void * source, int * job_here) {
+	mod_controller_t * c = (mod_controller_t *) source;
+
+	if (c->count_double == c->total) return false;
+
+	usleep(50000 + rand() % 50000);
+
+	*job_here = c->source[c->count_double] + 100;
+
+	printf("Pushed job: %d\n", *job_here);
+
+	c->count_double++;
+
+	return true;
+}
+
 bool consume(void * source, int job) {
-	printf("%d -> %d\n", job, job * 2);
+	printf("Retrieved job: %d\n", job);
 
 	usleep(250000 + rand() % 100000);
 
@@ -41,20 +57,21 @@ int main(int argc, char ** argv) {
 	srand(time(0));
 
 	c.total = 100;
-	c.count = 0;
+	c.count = c.count_double = 0;
 	c.source = malloc(sizeof(int) * c.total);
 
 	for (i = 0; i < c.total; i++) c.source[i] = i;
 
-	spmc_controller_init(&c.controller, &c, 3, 5);
+	mpmc_controller_init(&c.controller, &c, 3, 5);
 
-	c.controller.produce = produce;
-	c.controller.consume = consume;
+	mpmc_controller_add_producer(&c.controller, produce);
+	mpmc_controller_add_producer(&c.controller, produce_double);
+	mpmc_controller_set_consumer(&c.controller, consume);
 
-	spmc_controller_run(&c.controller);
-	spmc_controller_wait(&c.controller);
+	mpmc_controller_run(&c.controller);
+	mpmc_controller_wait(&c.controller);
 
-	spmc_controller_destroy(&c.controller);
+	mpmc_controller_destroy(&c.controller);
 
 	free(c.source);
 

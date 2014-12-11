@@ -1,10 +1,12 @@
 find_package(Threads REQUIRED)
 
+set(SOURCES ${SOURCES} modulo/mpmc/queue.c)
+set(SOURCES ${SOURCES} modulo/mpmc/controller.c)
+# set(SOURCES ${SOURCES} modulo/mpmc/pool.c)
+
 set(SOURCES ${SOURCES} modulo/solver/node.c)
 set(SOURCES ${SOURCES} modulo/solver/controller.c)
-
-set(SOURCES ${SOURCES} modulo/spmc/queue.c)
-set(SOURCES ${SOURCES} modulo/spmc/controller.c)
+set(SOURCES ${SOURCES} modulo/solver/mpmc_types.c)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
