@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <time.h>
 
-_Bool produce(void * source, int * job_here) {
+bool produce(void * source, int * job_here) {
 	mod_controller_t * c = (mod_controller_t *) source;
 
 	if (c->count == c->total) return false;
@@ -20,9 +20,7 @@ _Bool produce(void * source, int * job_here) {
 	return true;
 }
 
-_Bool consume(void * source, int job) {
-	mod_controller_t * c = (mod_controller_t *) source;
-
+bool consume(void * source, int job) {
 	printf("%d -> %d\n", job, job * 2);
 
 	usleep(250000 + rand() % 100000);
@@ -30,7 +28,7 @@ _Bool consume(void * source, int job) {
 	if (rand() % 100 == 0) {
 		printf("STOP RIGHT NOW! THANK YOU VERY MUCH!\n");
 		printf("I NEED SOMEBODY WITH A HUMAN TOUCH!\n");
-		spmc_controller_stop(&c->controller);
+		return false;
 	}
 
 	return true;
