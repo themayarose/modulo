@@ -9,13 +9,13 @@ bool produce(void * source, int * job_here) {
 
 	if (c->count == c->total) return false;
 
-	usleep(50000 + rand() % 50000);
+	usleep(100000 + rand() % 50000);
 
 	*job_here = c->source[c->count];
 
-	printf("Pushed job: %d\n", *job_here);
-
 	c->count++;
+
+	fprintf(c->producers, "Job: %d\n", *job_here);
 
 	return true;
 }
@@ -25,19 +25,21 @@ bool produce_double(void * source, int * job_here) {
 
 	if (c->count_double == c->total) return false;
 
-	usleep(50000 + rand() % 50000);
+	usleep(100000 + rand() % 50000);
 
 	*job_here = c->source[c->count_double] + 100;
 
-	printf("Pushed job: %d\n", *job_here);
-
 	c->count_double++;
+
+	fprintf(c->producers, "Job: %d\n", *job_here);
 
 	return true;
 }
 
 bool consume(void * source, int job) {
-	printf("Retrieved job: %d\n", job);
+	mod_controller_t * c = (mod_controller_t *) source;
+
+	fprintf(c->consumers, "Job: %d\n", job);
 
 	usleep(250000 + rand() % 100000);
 
@@ -59,6 +61,8 @@ int main(int argc, char ** argv) {
 	c.total = 100;
 	c.count = c.count_double = 0;
 	c.source = malloc(sizeof(int) * c.total);
+	c.producers = fopen("producers.txt", "w");
+	c.consumers = fopen("consumers.txt", "w");
 
 	for (i = 0; i < c.total; i++) c.source[i] = i;
 
@@ -74,6 +78,9 @@ int main(int argc, char ** argv) {
 	mpmc_controller_destroy(&c.controller);
 
 	free(c.source);
+
+	fclose(c.producers);
+	fclose(c.consumers);
 
 
 	return EXIT_SUCCESS;

@@ -8,6 +8,8 @@ typedef struct mod_controller_struct {
 	int count, count_double;
 	int total;
 	int * source;
+	FILE * producers;
+	FILE * consumers;
 } mod_controller_t;
 
 #endif /* end of include guard: CONTROLLER_H_EZOLFSZB */
