@@ -8,6 +8,8 @@
 #define MPMC_TYPE(T) mpmc_controller_##T##_t
 #define MPMC_FN(NAME, T) mpmc_controller_##NAME##_##T
 
+#define MPMC_POOL_PTR(T) mpmc_pool_##T##_ptr
+
 #define MPMC_PRODUCER_TYPE(T) mpmc_producer_##T##_t
 #define MPMC_CONSUMER_TYPE(T) mpmc_consumer_##T##_t
 

@@ -30,7 +30,7 @@
 		uint64_t index; \
 		MPMC_TYPE(T) * controller; \
 	} _mpmc_data_##T##_t; \
-	void MPMC_FN(init, T)(MPMC_TYPE(T) * controller, void * source, \
+	_Bool MPMC_FN(init, T)(MPMC_TYPE(T) * controller, void * source, \
 			uint64_t consumers, uint64_t queue_size); \
 	void MPMC_FN(destroy, T)(MPMC_TYPE(T) * controller); \
 	_Bool MPMC_FN(add_producer, T)(MPMC_TYPE(T) * controller, \
@@ -46,7 +46,7 @@
 	void MPMC_FN(wait, T)(MPMC_TYPE(T) * controller);
 
 #define MPMC_CONTROLLER_DEF(T) \
-	void MPMC_FN(init, T)(MPMC_TYPE(T) * controller, void * source, \
+	_Bool MPMC_FN(init, T)(MPMC_TYPE(T) * controller, void * source, \
 			uint64_t consumers, uint64_t queue_size) { \
 		controller->source = source; \
 		controller->is_running = 0; \
@@ -56,9 +56,18 @@
 		controller->producer_threads = NULL; \
 		controller->consumer_count = consumers; \
 		controller->consumer_threads = malloc(sizeof(pthread_t) * consumers); \
+		\
+		if (!controller->consumer_threads) return 0; \
+		\
 		controller->producers = NULL; \
 		controller->consumer = NULL; \
-		mpmc_queue_init(&controller->queue, queue_size); \
+		\
+		if (!mpmc_queue_init(&controller->queue, queue_size)) { \
+			free(controller->consumer_threads); \
+			return 0; \
+		} \
+		\
+		return 1; \
 	}\
 	void MPMC_FN(destroy, T)(MPMC_TYPE(T) * controller) { \
 		free(controller->consumer_threads); \
@@ -161,9 +170,11 @@
 	void * MPMC_FN(consumer, T)(void * data) { \
 		MPMC_TYPE(T) * controller = (MPMC_TYPE(T) *) data; \
 		T job; \
+		_Bool did_pop; \
 		\
 		while (!atomic_load(&controller->should_stop)) {\
-			if (!mpmc_queue_pop(&controller->queue, &job)) { \
+			did_pop = mpmc_queue_pop(&controller->queue, &job); \
+			if (!did_pop) { \
 				if (MPMC_FN(has_producer_running, T)(controller)) continue; \
 				else break; \
 			} \
@@ -199,7 +210,6 @@
 #define MPMC_DEFINE(ALL_TYPES) \
 	MPMC_QUEUE_DEFINE(ALL_TYPES) \
 	ALL_TYPES(MPMC_CONTROLLER_DEF)
-	
 
 MPMC_DECLARE(MPMC_USER_TYPES)
 

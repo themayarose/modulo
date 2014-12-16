@@ -2,7 +2,7 @@ find_package(Threads REQUIRED)
 
 set(SOURCES ${SOURCES} modulo/mpmc/queue.c)
 set(SOURCES ${SOURCES} modulo/mpmc/controller.c)
-# set(SOURCES ${SOURCES} modulo/mpmc/pool.c)
+set(SOURCES ${SOURCES} modulo/pool/pool.c)
 
 set(SOURCES ${SOURCES} modulo/solver/node.c)
 set(SOURCES ${SOURCES} modulo/solver/controller.c)
