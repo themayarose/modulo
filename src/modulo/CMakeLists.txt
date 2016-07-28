@@ -14,4 +14,7 @@ add_library(modulo SHARED ${SOURCES})
 target_link_libraries(modulo ${CMAKE_THREAD_LIBS_INIT})
 target_include_directories(modulo PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-install(TARGETS modulo DESTINATION lib/modulo INCLUDES DESTINATION include)
+install(TARGETS modulo
+    LIBRARY DESTINATION lib/modulo
+    INCLUDES DESTINATION include
+    )

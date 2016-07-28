@@ -22,7 +22,7 @@
 #define MPMC_QUEUE_DESTROY(T) MPMC_QUEUE_FN(destroy, T)
 #define MPMC_QUEUE_PUSH(T) MPMC_QUEUE_FN(push, T)
 #define MPMC_QUEUE_POP(T) MPMC_QUEUE_FN(pop, T)
-#define MPMC_QUEUE_EXAUSTED(T) MPMC_QUEUE_FN(exausted, T)
+#define MPMC_QUEUE_EXHAUSTED(T) MPMC_QUEUE_FN(exhausted, T)
 
 #define MPMC_QUEUE_DEC(T) typedef struct \
 	mpmc_queue_##T##_struct { \
@@ -30,11 +30,11 @@
 			uint64_t size; \
 			atomic_uint_fast64_t head; \
 			atomic_uint_fast64_t tail; \
-			atomic_bool exausted; \
+			atomic_bool exhausted; \
 		} MPMC_QUEUE_TYPE(T); \
 		_Bool MPMC_QUEUE_INIT(T)(MPMC_QUEUE_TYPE(T) * queue, uint64_t size); \
 		void MPMC_QUEUE_DESTROY(T)(MPMC_QUEUE_TYPE(T) * queue); \
-		_Bool MPMC_QUEUE_EXAUSTED(T)(MPMC_QUEUE_TYPE(T) * queue); \
+		_Bool MPMC_QUEUE_EXHAUSTED(T)(MPMC_QUEUE_TYPE(T) * queue); \
 		_Bool MPMC_QUEUE_PUSH(T)(MPMC_QUEUE_TYPE(T) * queue, T element); \
 		_Bool MPMC_QUEUE_POP(T)(MPMC_QUEUE_TYPE(T) * queue, T * placeholder);
 
@@ -48,15 +48,15 @@
 		memset(queue->buffer, 0, sizeof(T) * size); \
 		atomic_init(&queue->head, 1); \
 		atomic_init(&queue->tail, 1); \
-		atomic_init(&queue->exausted, 0); \
+		atomic_init(&queue->exhausted, 0); \
 		\
 		return 1; \
 	} \
 	void MPMC_QUEUE_DESTROY(T)(MPMC_QUEUE_TYPE(T) * queue) { \
 		free(queue->buffer);\
 	} \
-	_Bool MPMC_QUEUE_EXAUSTED(T)(MPMC_QUEUE_TYPE(T) * queue) { \
-		return atomic_load(&queue->exausted); \
+	_Bool MPMC_QUEUE_EXHAUSTED(T)(MPMC_QUEUE_TYPE(T) * queue) { \
+		return atomic_load(&queue->exhausted); \
 	} \
 	_Bool MPMC_QUEUE_PUSH(T)(MPMC_QUEUE_TYPE(T) * queue, T element) {\
 		uint_fast64_t target, head, new_tail; \
@@ -73,7 +73,7 @@
 			new_tail = target + 1; \
 			\
 			if (target == UINT_FAST64_MAX) { \
-				atomic_store(&queue->exausted, 1); \
+				atomic_store(&queue->exhausted, 1); \
 				break; \
 			} \
 			\
@@ -125,8 +125,8 @@ MPMC_QUEUE_DECLARE(MPMC_USER_TYPES)
 #define mpmc_queue_destroy(Q) \
 	MPMC_USER_QUEUE_FN(Q, destroy)((Q))
 
-#define mpmc_queue_exausted(Q) \
-	MPMC_USER_QUEUE_FN(Q, exausted)((Q))
+#define mpmc_queue_exhausted(Q) \
+	MPMC_USER_QUEUE_FN(Q, exhausted)((Q))
 
 #define mpmc_queue_push(Q, ELEM) \
 	MPMC_USER_QUEUE_FN(Q, push)((Q), (ELEM))

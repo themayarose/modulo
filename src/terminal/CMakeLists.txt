@@ -8,12 +8,14 @@ set(INTERNAL_LIBRARIES ${INTERNAL_LIBRARIES} modulo)
 
 add_executable(modulo_tty ${SOURCES})
 
-target_link_libraries(modulo_tty LINK_PUBLIC ${INTERNAL_LIBRARIES})
-
-install(TARGETS modulo_tty DESTINATION bin)
+target_link_libraries(modulo_tty PUBLIC ${INTERNAL_LIBRARIES})
 
 if (APPLE)
-	set_target_properties(modulo_tty PROPERTIES INSTALL_RPATH
-		"@loader_path/../lib/modulo")
+    set_target_properties(modulo_tty PROPERTIES INSTALL_RPATH
+        "@loader_path/../lib/modulo")
+else ()
+    set_target_properties(modulo_tty PROPERTIES INSTALL_RPATH
+        "$ORIGIN/../lib/modulo")
 endif()
 
+install(TARGETS modulo_tty RUNTIME DESTINATION bin)
